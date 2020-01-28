@@ -4,7 +4,7 @@ WORKDIR /api
 
 COPY requirements.txt ./
 
-RUN apk add --update build-base && \
+RUN apk add --update build-base libffi-dev && \
     rm -rf /var/cache/apk/*
 
 RUN pip install --no-cache-dir -r requirements.txt

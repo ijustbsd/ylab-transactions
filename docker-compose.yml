@@ -1,5 +1,7 @@
 version: "3"
 services:
+
+
   web:
     build: ./api
     restart: always
@@ -12,12 +14,20 @@ services:
       options:
           max-size: "2m"
           max-file: "10"
+    depends_on:
+      - "postgres"
     environment:
+      # параметры подключения к бд
       DB_USER: dbuser
       DB_PASSWORD: dbpassword
       DB_NAME: transactions
-    depends_on:
-      - "postgres"
+
+      # параметры начального пользователя
+      USER_EMAIL: root@localhost
+      USER_PASSWORD: 1234
+      USER_BALANCE: 1.234
+      USER_CURRENCY: BTC
+
 
   postgres:
     image: postgres:12.1-alpine
@@ -28,6 +38,7 @@ services:
     expose:
       - "5432"
     environment:
+      # параметры для инициализации бд
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: transactions
