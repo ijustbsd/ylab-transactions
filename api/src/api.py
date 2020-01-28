@@ -1,14 +1,49 @@
 # coding: utf-8
 
 import base64
+import datetime
 import hashlib
 
 import bcrypt
+import jwt
 
 
 class API():
-    def __init__(self, pool):
+    def __init__(self, pool, secret):
         self.pool = pool
+        self.secret = secret
+
+    def _create_token(self, email, lifetime=10):
+        """
+        Создаёт JWT токен.
+        """
+        # токен действителен lifetime минут
+        exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=lifetime)
+        payload = {'email': email, 'exp': exp}
+        token = jwt.encode(payload, self.secret, algorithm='HS256')
+        return token.decode()
+
+    def _check_token(self, token):
+        """
+        Проверяет валидность JWT токена.
+        """
+        try:
+            payload = jwt.decode(token.encode(), self.secret, algorithm='HS256')
+        except jwt.ExpiredSignatureError:
+            return False, 'Token expired!'
+        except (jwt.DecodeError, AttributeError):
+            return False, 'Invalid token!'
+        return True, payload['email']
+
+    def _prepare_for_bcrypt(self, password):
+        """
+        Подготавливает пароль для хеширования bcrypt'ом.
+        """
+        # bcrypt не умеет работать со строками больше 72 символов
+        sha256_hash = hashlib.sha256(password.encode()).digest()
+        # защищаемся от NULL байтов
+        base64_hash = base64.b64encode(sha256_hash)
+        return base64_hash
 
     async def _get_user(self, email):
         """
@@ -30,12 +65,9 @@ class API():
         if await self._get_user(email):
             return 400, 'User with this email already exist!', {}
 
-        # bcrypt не умеет работать со строками больше 72 символов
-        sha256_hash = hashlib.sha256(password.encode()).digest()
-        # защищаемся от NULL байтов
-        base64_hash = base64.b64encode(sha256_hash)
+        password = self._prepare_for_bcrypt(password)
         # хешируем и солим пароль для хранения в базе
-        hashed = bcrypt.hashpw(base64_hash, bcrypt.gensalt(12))
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt(12))
 
         # добавляем пользователя в бд
         async with self.pool.acquire() as conn:
@@ -48,7 +80,19 @@ class API():
         """
         Авторизует пользователя.
         """
-        return 200, 'OK', {}
+
+        user = await self._get_user(email)
+
+        # проверяем зарегистрирован ли пользователь с таким email'ом
+        if not user:
+            return 404, 'User not found!', {}
+
+        password = self._prepare_for_bcrypt(password)
+        # если хеши совпали, то отдаём пользователю токен
+        if bcrypt.checkpw(password, user['password']):
+            return 200, 'OK', self._create_token(email)
+
+        return 403, 'Wrong password!', {}
 
     async def get_transactions_list(self, **kwargs):
         """

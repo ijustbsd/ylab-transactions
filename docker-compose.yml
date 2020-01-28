@@ -28,6 +28,9 @@ services:
       USER_BALANCE: 1.234
       USER_CURRENCY: BTC
 
+      # ключ для генерации JWT токенов
+      SECRET_KEY: SuperSecretKey
+
 
   postgres:
     image: postgres:12.1-alpine
