@@ -12,3 +12,22 @@ services:
       options:
           max-size: "2m"
           max-file: "10"
+    environment:
+      DB_USER: dbuser
+      DB_PASSWORD: dbpassword
+      DB_NAME: transactions
+    depends_on:
+      - "postgres"
+
+  postgres:
+    image: postgres:12.1-alpine
+    restart: always
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./init_db.sh:/docker-entrypoint-initdb.d/init_db.sh:ro
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: transactions
