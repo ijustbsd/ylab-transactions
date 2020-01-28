@@ -31,6 +31,9 @@ services:
       # ключ для генерации JWT токенов
       SECRET_KEY: SuperSecretKey
 
+      # время в минутах между обновлениями курса валют
+      CURRENCY_UPDATE_DELAY: 3
+
 
   postgres:
     image: postgres:12.1-alpine

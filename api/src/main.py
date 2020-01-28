@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import asyncio
 import json
 import os
 
@@ -52,6 +53,9 @@ async def main_post(request):
     if not result:
         return api_response(403, msg, {})
 
+    # если токен валидный, здесь будет лежать email текущего пользователя
+    params['current_user'] = msg
+
     # вызываем метод используя getattr т.к. он провалидирован jsonschem'ой
     code, msg, payload = await getattr(api, query)(**params)
     return api_response(code, msg, payload)
@@ -78,6 +82,10 @@ async def create_app():
     balance = os.environ['USER_BALANCE']
     currency = os.environ['USER_CURRENCY']
     await app['api'].add_user(email, password, balance, currency)
+
+    # запускаем фоновое обновление курса валют
+    loop = asyncio.get_event_loop()
+    loop.create_task(app['api'].update_currency_run())
 
     return app
 

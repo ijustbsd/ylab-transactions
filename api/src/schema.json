@@ -26,9 +26,10 @@
         "make_transaction": {
             "type": "object",
             "properties": {
-                "email": {"type": "string"}
+                "email": {"type": "string"},
+                "amount": {"type": "number"}
             },
-            "required": ["email"],
+            "required": ["email", "amount"],
             "additionalProperties": false
         },
         "get_transactions_list": {
