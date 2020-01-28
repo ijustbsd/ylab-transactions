@@ -86,13 +86,15 @@
 {
     "request": {
         "make_transaction": {
-            "email": "user@host", // кому отправляем
+            "email": "user@host",
             "amount": 1
         }
     },
     "token": "bla-bla"
 }
 ```
+
+`email` - email получателя.
 
 #### Список операций по счёту
 
@@ -102,10 +104,13 @@
 {
     "request": {
         "get_transactions_list": {
-            "limit": 10, // отдать не более N записей
-            "skip": 20 // пропустить первые N записей
+            "limit": 10,
+            "skip": 20
         }
     },
     "token": "bla-bla"
 }
 ```
+
+`limit` - отдать не более N записей;  
+`skip` - пропустить первые N записей.
