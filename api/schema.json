@@ -1,0 +1,64 @@
+{
+    "definitions": {
+        "add_user": {
+            "type": "object",
+            "properties": {
+                "balance": {"type": "number"},
+                "currency": {
+                    "type": "string",
+                    "maxLength": 3
+                },
+                "email": {"type": "string"},
+                "password": {"type": "string"}
+            },
+            "required": ["balance", "currency", "email", "password"],
+            "additionalProperties": false
+        },
+        "auth": {
+            "type": "object",
+            "properties": {
+                "email": {"type": "string"},
+                "password": {"type": "string"}
+            },
+            "required": ["email", "password"],
+            "additionalProperties": false
+        },
+        "make_transaction": {
+            "type": "object",
+            "properties": {
+                "email": {"type": "string"}
+            },
+            "required": ["email"],
+            "additionalProperties": false
+        },
+        "get_transactions_list": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer"},
+                "skip": {"type": "integer"}
+            },
+            "additionalProperties": false
+        }
+    },
+
+    "type": "object",
+    "properties": {
+        "request": {
+            "type": "object",
+            "properties": {
+                "add_user": {"$ref": "#/definitions/add_user"},
+                "auth": {"$ref": "#/definitions/auth"},
+                "make_transaction": {"$ref": "#/definitions/make_transaction"},
+                "get_transactions_list": {"$ref": "#/definitions/get_transactions_list"}
+            },
+            "additionalProperties": false,
+            "minProperties": 1,
+            "maxProperties": 1
+        },
+        "token": {
+            "type": "string"
+        }
+    },
+    "required": ["request", "token"],
+    "additionalProperties": false
+}
